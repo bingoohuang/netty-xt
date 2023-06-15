@@ -12,7 +12,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         Msg record = (Msg) msg;
-        log.info("got msg: {}", new String(record.getBody(), StandardCharsets.UTF_8));
+        log.info("got: {}", new String(record.getBody(), StandardCharsets.UTF_8));
         super.channelRead(ctx, msg);
     }
 

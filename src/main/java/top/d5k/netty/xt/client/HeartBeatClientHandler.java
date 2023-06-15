@@ -4,7 +4,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import top.d5k.netty.xt.msg.Header;
 import top.d5k.netty.xt.msg.Msg;
 
 import java.util.concurrent.ScheduledFuture;
@@ -27,11 +26,11 @@ public class HeartBeatClientHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         Msg m = (Msg) msg;
         // 握手成功，主动发送心跳消息
-        Header h = m.getHeader();
-        if (h != null && h.getType() == Msg.MsgType.LOGIN_RSP.value()) {
+        byte typ = m.getType();
+        if (typ == Msg.MsgType.LOGIN_RSP.value()) {
             heartBeat = ctx.executor().scheduleAtFixedRate(new Task(ctx), 0, 15, TimeUnit.SECONDS);
-        } else if (h != null && h.getType() == Msg.MsgType.HEARTBEAT_RSP.value()) {
-            log.info("receive heart beat: {}", m);
+        } else if (typ == Msg.MsgType.HEARTBEAT_RSP.value()) {
+            log.info("got heart beat: {}", m);
         } else
             ctx.fireChannelRead(msg);
     }

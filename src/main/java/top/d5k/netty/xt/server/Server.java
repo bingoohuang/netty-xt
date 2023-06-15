@@ -39,15 +39,15 @@ public class Server {
                                 new MsgDecoder(),
                                 new MsgEncoder(),
                                 new ReadTimeoutHandler(50),
-                                new LoginServerHandler(),
-                                new HeartBeatServerHandler(),
+//                                new LoginServerHandler(),
+//                                new HeartBeatServerHandler(),
                                 new ServerHandler());
                     }
                 });
 
-        ChannelFuture cf = b.bind("127.0.0.1", 12088).sync();
+        ChannelFuture cf = b.bind("127.0.0.1", 9100).sync();
 
-        log.info("Netty server start ok : 127.0.0.1:12088");
+        log.info("Netty server start ok : 127.0.0.1:9100");
 
         // 释放连接
         cf.channel().closeFuture().sync();

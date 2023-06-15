@@ -3,7 +3,6 @@ package top.d5k.netty.xt.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
-import top.d5k.netty.xt.msg.Header;
 import top.d5k.netty.xt.msg.Msg;
 
 import java.nio.charset.StandardCharsets;
@@ -34,15 +33,13 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         Msg requestMsg = (Msg) msg;
 
         String body = new String(requestMsg.getBody(), StandardCharsets.UTF_8);
-        log.info("recv message {}", body);
+        log.info("got {}", body);
 
         Msg rsp = new Msg();
-        Header header = new Header();
-        header.setSessionID(2002L);
-        header.setPriority((byte) 2);
-        header.setType((byte) 1);
-        rsp.setHeader(header);
-        rsp.setBody(("我是响应数据: " + body).getBytes(StandardCharsets.UTF_8));
+        rsp.setSessionID(2002L);
+        rsp.setPriority((byte) 2);
+        rsp.setType((byte) 1);
+        rsp.setBody(("响应: " + body).getBytes(StandardCharsets.UTF_8));
         ctx.writeAndFlush(rsp);
     }
 

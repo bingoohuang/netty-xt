@@ -8,7 +8,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.ResourceLeakDetector;
 import lombok.extern.slf4j.Slf4j;
-import top.d5k.netty.xt.msg.Header;
 import top.d5k.netty.xt.msg.Msg;
 import top.d5k.netty.xt.msg.MsgDecoder;
 import top.d5k.netty.xt.msg.MsgEncoder;
@@ -23,14 +22,13 @@ import java.util.concurrent.TimeUnit;
 public class Client {
 
     public static void main(String[] args) throws Exception {
-        Client client = new Client();
-        client.executor.submit(() -> client.connect("127.0.0.1", 12088));
-
+        Client c = new Client();
+        c.executor.submit(() -> c.connect("127.0.0.1", 9100));
 
         for (int i = 0; i < 1000; i++) {
             TimeUnit.SECONDS.sleep(3);
             try {
-                client.sendMessage(("请求消息" + i).getBytes(StandardCharsets.UTF_8));
+                c.sendMessage(("请求消息" + i).getBytes(StandardCharsets.UTF_8));
             } catch (Exception ex) {
                 log.error("发消息失败", ex);
             }
@@ -44,11 +42,9 @@ public class Client {
      */
     public void sendMessage(byte[] body) {
         Msg msg = new Msg();
-        Header header = new Header();
-        header.setSessionID(1001L);
-        header.setPriority((byte) 1);
-        header.setType((byte) 0);
-        msg.setHeader(header);
+        msg.setSessionID(1001L);
+        msg.setPriority((byte) 1);
+        msg.setType((byte) 0);
         msg.setBody(body);
         channel.writeAndFlush(msg);
     }
@@ -75,8 +71,8 @@ public class Client {
                                     new MsgDecoder(),
                                     new MsgEncoder(),
                                     new ReadTimeoutHandler(15),
-                                    new LoginClientHandler(),
-                                    new HeartBeatClientHandler(),
+//                                    new LoginClientHandler(),
+//                                    new HeartBeatClientHandler(),
                                     new ClientHandler()
                             );
                         }

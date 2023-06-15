@@ -1,44 +1,89 @@
 package top.d5k.netty.xt.msg;
 
+import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
 @Data
 public final class Msg {
-    private Header header = new Header();
+    private int magic = 0xACAFDCBA; // 唯一的通信标志
+    private int length; // 总消息的长度 header + body (不包括 magic 和 自身的长度）
+
+    private byte type; // 消息的类型
+    private byte tag; //  标记
+    private byte priority; // 消息的优先级 0~255
+    private byte version = 0; // 版本号
+
+    private long sessionID;
     private byte[] body;
 
-    public static Msg buildLoginReq() {
-        Header h = new Header();
-        h.setMessageType(MsgType.LOGIN_REQ);
+    public void setMessageType(Msg.MsgType messageType) {
+        this.type = messageType.value();
+    }
 
+    public void encode(ByteBuf buf) {
+        buf.writeInt(magic);
+        buf.writeInt(length);
+
+        buf.writeByte(type);
+        buf.writeByte(tag);
+        buf.writeByte(priority);
+        buf.writeByte(version);
+        buf.writeLong(sessionID);
+
+
+        if (body != null && body.length > 0) {
+            buf.writeBytes(body);
+        }
+
+        // 最后我们要获取整个数据包的总长度 也就是 header +  body 进行对 header length的设置
+
+        // 在这里必须要-8个字节 ，是因为要把Magic和长度本身占的减掉了
+        //（官方中给出的是：LengthFieldBasedFrameDecoder中的lengthFieldOffset+lengthFieldLength）
+        // 总长度是在header协议的第二个标记字段中
+        int len = buf.readableBytes() - 8;
+        buf.setInt(4, len);
+    }
+
+    public void decode(ByteBuf buf) {
+        magic = buf.readInt();
+        length = buf.readInt();
+
+        type = buf.readByte();
+        tag = buf.readByte();
+        priority = buf.readByte();
+        version = buf.readByte();
+        sessionID = buf.readLong();
+
+        int dataLength = length - 12;
+        body = new byte[dataLength];
+        if (dataLength > 0) {
+            buf.readBytes(body);
+        }
+    }
+
+
+    public static Msg buildLoginReq() {
         Msg m = new Msg();
-        m.setHeader(h);
+        m.setMessageType(MsgType.LOGIN_REQ);
         return m;
     }
 
     public static Msg buildLoginReq(ResultType result) {
-        Header h = new Header();
-        h.setMessageType(MsgType.LOGIN_RSP);
-
         Msg msg = new Msg();
-        msg.setHeader(h);
+        msg.setMessageType(MsgType.LOGIN_RSP);
         msg.setBody(new byte[]{result.getValue()});
         return msg;
     }
 
     public static Msg buildHeatBeatReq() {
-        Header h = new Header();
-        h.setMessageType(Msg.MsgType.HEARTBEAT_REQ);
         Msg msg = new Msg();
-        msg.setHeader(h);
+        msg.setMessageType(Msg.MsgType.HEARTBEAT_REQ);
         return msg;
     }
 
     public static Msg buildHeatBeatRsp() {
-        Header h = new Header();
-        h.setMessageType(MsgType.HEARTBEAT_RSP);
         Msg msg = new Msg();
-        msg.setHeader(h);
+        msg.setMessageType(MsgType.HEARTBEAT_RSP);
         return msg;
     }
 

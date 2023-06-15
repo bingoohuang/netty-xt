@@ -22,17 +22,8 @@ public class MsgDecoder extends LengthFieldBasedFrameDecoder {
             return null;
         }
 
-        Header h = new Header();
-        h.decode(frame);
-        int bodyLen = frame.readInt();
-        byte[] body = new byte[bodyLen];
-        if (bodyLen > 0) {
-            frame.readBytes(body);
-        }
-
         Msg m = new Msg();
-        m.setHeader(h);
-        m.setBody(body);
+        m.decode(frame);
 
         return m;
     }

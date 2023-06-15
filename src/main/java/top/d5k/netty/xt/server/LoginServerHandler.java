@@ -3,7 +3,6 @@ package top.d5k.netty.xt.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
-import top.d5k.netty.xt.msg.Header;
 import top.d5k.netty.xt.msg.Msg;
 import top.d5k.netty.xt.msg.ResultType;
 
@@ -22,15 +21,13 @@ public class LoginServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        Msg m = (Msg) msg;
+        Msg h = (Msg) msg;
 
         // 如果是握手请求消息，处理，其它消息透传
-        Header h = m.getHeader();
-        if (h == null || h.getType() != Msg.MsgType.LOGIN_REQ.value()) {
+        if (h.getType() != Msg.MsgType.LOGIN_REQ.value()) {
             ctx.fireChannelRead(msg);
             return;
         }
-
 
         String nodeIndex = ctx.channel().remoteAddress().toString();
         Msg loginResp;

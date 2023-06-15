@@ -3,7 +3,6 @@ package top.d5k.netty.xt.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.slf4j.Slf4j;
-import top.d5k.netty.xt.msg.Header;
 import top.d5k.netty.xt.msg.Msg;
 
 /**
@@ -20,11 +19,9 @@ import top.d5k.netty.xt.msg.Msg;
 public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        Msg m = (Msg) msg;
-        Header h = m.getHeader();
-        if (h != null && h.getType() == Msg.MsgType.HEARTBEAT_REQ.value()) {
-            log.info("receive heart beat: {} ", m);
-            // 返回心跳应答消息
+        Msg h = (Msg) msg;
+        if (h.getType() == Msg.MsgType.HEARTBEAT_REQ.value()) {
+            log.info("got heart beat: {} ", h);
             Msg heartBeat = Msg.buildHeatBeatRsp();
             ctx.writeAndFlush(heartBeat);
         } else
